@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	#info {
+		position: absolute;
+		top: 10px; width: 100%;
+		
+		padding: 5px;
+		text-align: center;
+		color: #ffff00;
+	}
+	a {color: #00ffff}
+	strong {color:red}
+</style>
+</head>
+
+<body>
+<div id="container"></div>
+<div id="info">
+	<br/>
+	<br/>
+     H W 2 <br/>
+	 <a href="javascript:open();">OPEN</a><br/>
+	 <a href="javascript:close();">CLOSE</a><br/>
+	 
+</div>
+<div id="angleInfo"> </div>
+
+	<audio id="opensound">
+	<source src="http://pgasound.com/fileserver/pgasound/creak/CreakWood%206046_97_1.wav" type='audio/wav'>
+	</audio>
+	<audio id="closesound">
+	<source src="http://www0.egr.uh.edu/Courses/INDE/inde6385/atbtts/XTRAS/sound/DOOROLD.WAV" type='audio/wav'>
+	</audio>
+
+<script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js">
+<script src="js/KeyboardState.js"></script>
+</script>
+
+<script>
+
+var scene, renderer, camera, angle = 0;
+var doorbolt1, dooro = false, doorc = false, opensound, closesound;
+var cube;
+var controls;
+opensound = document.getElementById ('opensound');
+closesound = document.getElementById ('closesound');
+init();
+animate();
+
+function init()
+{
+	renderer = new THREE.WebGLRenderer( {antialias:true} );
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	renderer.setSize (width, height);
+	renderer.setClearColor (0x888888);
+	
+	document.body.appendChild (renderer.domElement);
+
+	scene = new THREE.Scene();
+	//door--
+	cube = createMesh(new THREE.BoxGeometry (140,8,20), "wooden_door_texture2.jpg", "Scratch-Surface-1617907.jpg");	//new THREE.Mesh (new THREE.BoxGeometry (140,8,20),new THREE.MeshPhongMaterial ({color: 0x1ec876}));
+	cube.position.set (70, 4, -10);
+	scene.add (cube); //down
+	
+	cube = createMesh(new THREE.BoxGeometry (10,200,20), "wooden_door_texture2.jpg", "Scratch-Surface-1617907.jpg");//new THREE.Mesh (new THREE.BoxGeometry (10,200,20),new THREE.MeshPhongMaterial ({color: 0x1ec876}));
+	cube.position.set (5, 108, -10);
+	scene.add (cube);//left
+	
+	cube = createMesh(new THREE.BoxGeometry (10,200,20), "wooden_door_texture2.jpg", "Scratch-Surface-1617907.jpg");//new THREE.Mesh (new THREE.BoxGeometry (10,200,20),new THREE.MeshPhongMaterial ({color: 0x1ec876}));
+	cube.position.set (135, 108, -10);
+	scene.add (cube);//right
+	
+	cube = createMesh(new THREE.BoxGeometry (140,8,20), "wooden_door_texture2.jpg", "Scratch-Surface-1617907.jpg");//new THREE.Mesh (new THREE.BoxGeometry (140,8,20),new THREE.MeshPhongMaterial ({color: 0x1ec876}));
+	cube.position.set (70, 212, -10);
+	scene.add (cube);//top
+	
+	
+	//door-bolt
+	
+	doorbolt = new THREE.CylinderGeometry( 1, 1, 10, 32 );
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	doorbolt1 = new THREE.Mesh( doorbolt, material ); 
+	doorbolt1.position.set (130,150,0);
+	scene.add (doorbolt1);
+	
+	doorbolt = new THREE.CylinderGeometry( 1, 1, 10, 32 );
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doorbolt2 = new THREE.Mesh( doorbolt, material ); 
+	doorbolt2.position.set (130,75,0);
+	scene.add (doorbolt2);
+	
+	//
+	cube = new THREE.CubeGeometry( 1, 25, 18);
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doorcube = new THREE.Mesh( cube, material ); 
+	doorcube.position.set (129, 73, -10);
+	scene.add (doorcube); 
+	
+	cube = new THREE.CubeGeometry( 1, 25, 18);
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doorcube = new THREE.Mesh( cube, material ); 
+	doorcube.position.set (129, 148, -10);
+	scene.add (doorcube); 
+	////////////////
+	cube = new THREE.CubeGeometry( 1, 25, 18);
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doorcube2 = new THREE.Mesh( cube, material ); 
+	doorcube2.position.set (60, -35, 0);
+	scene.add (doorcube2); 
+	
+	cube = new THREE.CubeGeometry( 1, 25, 18);
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doorcube3 = new THREE.Mesh( cube, material ); 
+	doorcube3.position.set (60, 40, 0);
+	scene.add (doorcube3); 
+	
+	//door
+	door = createMesh(new THREE.BoxGeometry (120,200,20), "wooden_door_texture.jpg", "wooden_door_texture_bump.jpg");//new THREE.Mesh (new THREE.BoxGeometry (140,8,20),new THREE.MeshPhongMaterial ({color: 0x1ec876}));
+	door.position.set (-60,-42,-10);
+	scene.add (door);//door
+	
+	//////door-nob
+	doornob = new THREE.CylinderGeometry( 4, 4, 2, 32 );
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doornob1 = new THREE.Mesh( doornob, material ); 
+	doornob1.position.set (-55,0,10);
+	doornob1.rotation.x = Math.PI/2;
+	scene.add (doornob1);
+	
+	doornob = new THREE.CylinderGeometry( 2, 2, 4, 32 );
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doornob2 = new THREE.Mesh( doornob, material ); 
+	doornob2.position.set (0,3,0);
+	scene.add (doornob2);
+	
+	doornob = new THREE.SphereGeometry(3, 32, 32); 				
+	var material = new THREE.MeshLambertMaterial( {color: 0xc0c0c0} );
+	var doornob3 = new THREE.Mesh( doornob, material ); 
+	doornob3.position.set (0,3,0);
+	scene.add (doornob3);
+	//
+    doornob2.add(doornob3);
+	doornob1.add(doornob2);
+	door.add(doornob1);
+	doorbolt1.add(door);
+	door.add(doorcube2);
+	door.add(doorcube3);
+	
+	var doornob4 = doornob1.clone();
+	doornob4.rotation.z=Math.PI;
+	doornob4.position.set(-55,2,-10);
+	scene.add(doornob4);
+	door.add(doornob4);
+	
+	//
+	camera = new THREE.PerspectiveCamera (45, width/height, 1, 10000);
+	camera.position.y = 560;
+	camera.position.z = 400;
+	camera.lookAt (new THREE.Vector3(0,0,0));
+
+	controls = new THREE.OrbitControls (camera, renderer.domElement);
+	
+	// GRID
+	
+	var gridXZ = new THREE.GridHelper(200, 20);
+	gridXZ.setColors( new THREE.Color(0xff0000), new THREE.Color(0xffffff) );
+	scene.add(gridXZ);
+
+	var pointLight = new THREE.PointLight (0xffffff);
+	pointLight.position.set (0,300,200);
+	scene.add (pointLight);
+	
+	window.addEventListener ('resize', onWindowResize, false);
+}
+
+function open(){
+	if( dooro == false )
+	{
+		dooro = true;
+		doorc = false;
+}
+}
+
+function close(){
+	if( doorc == false )
+	{
+		doorc = true;
+		dooro = false;
+}
+}
+
+
+function onWindowResize ()
+{
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize (window.innerWidth, window.innerHeight);
+}
+
+function createMesh(geom, imageFile, bump) 
+{
+	geom.computeVertexNormals();
+
+	var mat = new THREE.MeshPhongMaterial();
+	var texture = THREE.ImageUtils.loadTexture("images/" + imageFile)
+	mat.map = texture;
+
+	if (bump) {
+		var bump = THREE.ImageUtils.loadTexture("images/" + bump)
+		mat.bumpMap = bump;
+		mat.bumpScale = 0.5;
+	}
+
+	var mesh = new THREE.Mesh(geom, mat);
+
+	return mesh;
+}
+
+
+function animate()
+{
+
+	if( angle > 0 && doorc==true )
+	{
+		angle -= 0.02;
+		if( angle <= 0.1 && doorc==true)
+		closesound.play();
+	}	
+	if(angle <= 1.4 && dooro == true)
+	{
+		angle += 0.02;
+		if(angle <=1 && dooro==true)
+		opensound.play();
+	}	
+	doorbolt1.rotation.y = angle;
+	//console.log(angle);
+	controls.update();
+	requestAnimationFrame ( animate );  
+	renderer.render (scene, camera);
+}
+
+
+
+</script>
+</body>
+
+</html>
